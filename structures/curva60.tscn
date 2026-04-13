@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://curva60wrap"]
+
+[ext_resource type="Script" uid="uid://ci7hdst4sfqal" path="res://StructureBase.gd" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://ncwhg336t4a4" path="res://assets/curva60.glb" id="2_glb"]
+
+[node name="curva60" type="Node3D" unique_id=1092294399]
+script = ExtResource("1_base")
+is_rail = true
+
+[node name="Model" parent="." unique_id=1766464131 instance=ExtResource("2_glb")]

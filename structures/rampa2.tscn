@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://rampa2wrap"]
+
+[ext_resource type="Script" uid="uid://ci7hdst4sfqal" path="res://StructureBase.gd" id="1_base"]
+[ext_resource type="PackedScene" uid="uid://osiy3f78xpkw" path="res://assets/rampa2.glb" id="2_glb"]
+
+[node name="rampa2" type="Node3D" unique_id=1420488498]
+script = ExtResource("1_base")
+is_rail = true
+
+[node name="Model" parent="." unique_id=1536305731 instance=ExtResource("2_glb")]

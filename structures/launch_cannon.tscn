@@ -1,0 +1,52 @@
+[gd_scene format=3 uid="uid://lcan"]
+
+[ext_resource type="Script" uid="uid://eb12oslc3ef6" path="res://structures/LaunchCannon.gd" id="1_cannon"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_orange"]
+albedo_color = Color(1, 0.5, 0, 1)
+metallic = 0.45
+roughness = 0.55
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_base"]
+top_radius = 0.35
+bottom_radius = 0.35
+height = 0.1
+radial_segments = 32
+
+[sub_resource type="CylinderShape3D" id="CylShape_base"]
+height = 0.1
+radius = 0.35
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark_orange"]
+albedo_color = Color(0.75, 0.3, 0, 1)
+metallic = 0.45
+roughness = 0.55
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_barrel"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.4
+radial_segments = 16
+
+[node name="LaunchCannon" type="Node3D" unique_id=1833688758]
+script = ExtResource("1_cannon")
+launch_force = 10.0
+
+[node name="Base" type="StaticBody3D" parent="." unique_id=949921859]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Base" unique_id=1837576870]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+material_override = SubResource("Mat_orange")
+mesh = SubResource("CylinderMesh_base")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Base" unique_id=1239344]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+shape = SubResource("CylShape_base")
+
+[node name="BarrelPivot" type="Node3D" parent="." unique_id=1914126167]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0.1, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BarrelPivot" unique_id=2031461696]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+material_override = SubResource("Mat_dark_orange")
+mesh = SubResource("CylinderMesh_barrel")

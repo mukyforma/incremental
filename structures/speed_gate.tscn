@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://spgate"]
+
+[ext_resource type="Script" uid="uid://dspgate" path="res://structures/SpeedGate.gd" id="1_sgate"]
+[ext_resource type="PackedScene" uid="uid://dh6gvyib0mvmi" path="res://assets/speedGate.glb" id="2_b33go"]
+
+[sub_resource type="BoxShape3D" id="BoxShape_gate"]
+size = Vector3(0.36595458, 0.29888612, 0.62474364)
+
+[node name="SpeedGate" type="Node3D" unique_id=49044670]
+script = ExtResource("1_sgate")
+
+[node name="GateArea" type="Area3D" parent="." unique_id=953259854]
+transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, 0, 0.283, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GateArea" unique_id=2081657693]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.012213105, -0.06966092, -0.024407983)
+shape = SubResource("BoxShape_gate")
+
+[node name="speedGate" parent="." unique_id=1541483407 instance=ExtResource("2_b33go")]

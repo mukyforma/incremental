@@ -1,0 +1,50 @@
+[gd_scene format=3 uid="uid://mbl"]
+
+[ext_resource type="Script" uid="uid://bj78ytkyyl6a4" path="res://structures/Marble.gd" id="1_marble"]
+[ext_resource type="Shader" uid="uid://deqek5jonus6k" path="res://shaders/marble.gdshader" id="2_24cld"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_5aeqh"]
+friction = 0.8
+bounce = 0.2
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_5aeqh"]
+radius = 0.185
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_48yq4"]
+render_priority = 0
+shader = ExtResource("2_24cld")
+shader_parameter/hue_offset = 0.0
+shader_parameter/swirl_speed = 1.2
+shader_parameter/glow_strength = 1.6
+shader_parameter/saturation = 0.7
+shader_parameter/tint = Color(1, 1, 1, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_24cld"]
+material = SubResource("ShaderMaterial_48yq4")
+radius = 0.185
+height = 0.369
+
+[node name="Marble" type="RigidBody3D" unique_id=713018211]
+physics_material_override = SubResource("PhysicsMaterial_5aeqh")
+continuous_cd = true
+contact_monitor = true
+max_contacts_reported = 4
+script = ExtResource("1_marble")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1682448944]
+shape = SubResource("SphereShape3D_5aeqh")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=2142337078]
+mesh = SubResource("SphereMesh_24cld")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="." unique_id=107510885]
+
+[node name="Label3D" type="Label3D" parent="." unique_id=318420761]
+top_level = true
+pixel_size = 0.004
+billboard = 1
+no_depth_test = true
+fixed_size = true
+text = "0.0"
+font_size = 28
+outline_size = 6

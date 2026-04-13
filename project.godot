@@ -1,0 +1,38 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="marble"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.6", "Forward Plus")
+config/icon="res://icon.svg"
+
+[autoload]
+
+HexGrid="*res://HexGrid.gd"
+StructureRegistry="*res://StructureRegistry.gd"
+PlacementController="*res://autoloads/PlacementController.gd"
+SaveSystem="*res://SaveSystem.gd"
+LevelManager="*res://autoloads/LevelManager.gd"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
+jolt_physics_3d/simulation/velocity_steps=8
+jolt_physics_3d/simulation/position_steps=4
+3d/default_gravity=14.0
+3d/default_linear_damp=0.0
+3d/default_angular_damp=0.0
+3d/solver/solver_iterations=8
+
+[rendering]
+
+rendering_device/driver.windows="d3d12"

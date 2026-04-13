@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://strb"]
+
+[ext_resource type="Script" path="res://ui/StructureButton.gd" id="1_strb"]
+
+[node name="StructureButton" type="Button"]
+script = ExtResource("1_strb")

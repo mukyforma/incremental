@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://toolb"]
+
+[ext_resource type="Script" path="res://ui/ToolButton.gd" id="1_toolb"]
+
+[node name="ToolButton" type="Button"]
+script = ExtResource("1_toolb")

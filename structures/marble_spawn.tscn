@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://mbsp"]
+
+[ext_resource type="Script" uid="uid://ctcyjao7m8fxv" path="res://structures/MarbleSpawn.gd" id="1_spawn"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_white"]
+albedo_color = Color(0.9, 0.9, 0.9, 1)
+metallic = 0.2
+roughness = 0.7
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ped"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.15
+radial_segments = 16
+
+[sub_resource type="CylinderShape3D" id="CylShape_ped"]
+height = 0.15
+radius = 0.08
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_xgmb8"]
+size = Vector3(0.173, 0.19202758, 0.16789551)
+
+[node name="MarbleSpawn" type="Node3D" unique_id=2012197073]
+script = ExtResource("1_spawn")
+
+[node name="Pedestal" type="StaticBody3D" parent="." unique_id=329586363]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.069165796, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestal" unique_id=678240613]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+material_override = SubResource("Mat_white")
+mesh = SubResource("CylinderMesh_ped")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestal" unique_id=1745402997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
+shape = SubResource("CylShape_ped")
+
+[node name="MarbleDetector" type="Area3D" parent="." unique_id=1220873154]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="MarbleDetector" unique_id=1363754398]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.24432921, 0.00330811)
+shape = SubResource("BoxShape3D_xgmb8")
