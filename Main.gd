@@ -38,6 +38,12 @@ var _is_snapping          : bool    = false
 var _snap_target_pos      : Vector3 = Vector3.INF
 var _snapping_joint_world : Vector3 = Vector3.INF  # ghost joint that triggered snap
 
+# ── Delete tool: hovered-structure highlight ───────────────────────────────────
+## The StructureBase directly under the cursor while delete tool is active.
+var _hovered_structure : StructureBase = null
+## Saved material_override per MeshInstance3D so we can restore on un-hover.
+var _hover_saved_mats  : Dictionary    = {}   # MeshInstance3D -> Variant
+
 # ── Debug overlay ──────────────────────────────────────────────────────────────
 var _debug_node : FacePlacementDebug = null
 
@@ -176,7 +182,17 @@ func _process(delta: float) -> void:
 	if _save_menu.visible:
 		return
 	_cam_ctrl.process_wasd(delta)
-	_update_hover(get_viewport().get_mouse_position())
+
+	var mouse_pos := get_viewport().get_mouse_position()
+	if PlacementController.active_tool == &"delete":
+		_update_delete_hover(mouse_pos)
+		if _hovered_structure != null:
+			_renderer.set_hover(_hovered_structure.hex_position)
+	else:
+		if _hovered_structure != null:
+			_clear_delete_highlight()
+		_update_hover(mouse_pos)
+
 	_renderer.update_visible_region()
 
 # ── Hover ──────────────────────────────────────────────────────────────────────
@@ -285,17 +301,15 @@ func _push_debug_state() -> void:
 	if _debug_node == null:
 		return
 
-	var active_tool := PlacementController.active_tool
-
-	# Collect ghost TubeJoint world positions (build mode only)
+	# Collect ghost TubeJoint world positions
 	var ghost_joints: Array[Vector3] = []
-	if active_tool == &"build" and is_instance_valid(_ghost):
+	if is_instance_valid(_ghost):
 		for j: Node in _ghost.find_children("TubeJoint", "Marker3D", true, false):
 			ghost_joints.append(_ghost.global_transform * (j as Marker3D).position)
 
-	# Face validity is only meaningful during build
+	# Placement validity (green vs red face outline)
 	var can_place := false
-	if _face_active and active_tool == &"build":
+	if _face_active:
 		var occ: Array[Vector2i] = [_face_target_hex]
 		if is_instance_valid(_ghost) and _ghost.has_method(&"get_occupied_hexes"):
 			occ = _ghost.get_occupied_hexes(_face_target_hex, PlacementController.placement_rotation)
@@ -315,20 +329,6 @@ func _push_debug_state() -> void:
 		_is_snapping, snap_delta, ghost_joints,
 		_snapping_joint_world, _snap_target_pos)
 
-	# Resolve the delete target so the overlay can highlight it
-	var del_hex  := _face_target_hex
-	var del_h    : int = 0
-	var del_type : StringName = &""
-	if _face_active:
-		del_h = (max(0, _face_target_h - 1)) if _face_is_top else _face_target_h
-		var cell := HexGrid.get_cell(del_hex)
-		if cell != null:
-			var s = cell.stack.get(del_h, null)
-			if s != null and "structure_type" in s:
-				del_type = s.structure_type
-
-	_debug_node.set_delete_state(active_tool, del_hex, del_h, del_type)
-
 # ── Click dispatch ─────────────────────────────────────────────────────────────
 func _on_left_click(screen_pos: Vector2) -> void:
 	var cam : Camera3D = _cam_ctrl.get_camera()
@@ -345,10 +345,8 @@ func _on_left_click(screen_pos: Vector2) -> void:
 		&"build":
 			_do_build_smart()
 		&"delete":
-			if _face_active:
-				_do_delete_face()       # face detection drives the target
-			elif hit != null:
-				_do_delete(hex)         # ground-plane fallback
+			if _hovered_structure != null:
+				_do_delete_by_structure(_hovered_structure)
 		&"eyedropper":
 			if hit != null:
 				_do_eyedrop(hex)
@@ -429,24 +427,63 @@ func _do_build_at(hex: Vector2i, height: int, skip_support: bool) -> void:
 		PlacementController.placement_rotation * 60,
 		" [SNAPPED]" if skip_support else ""])
 
-## Delete using face-detection state as the authoritative target.
-## TOP face  → the solid whose top face was hit  (target_h - 1 is inside its span).
-## LATERAL face → whatever occupies target_hex at the snapped height.
-func _do_delete_face() -> void:
-	var target_hex := _face_target_hex
-	var target_h   : int
-	if _face_is_top:
-		# _face_target_h = base_h + span  →  base_h + span - 1 is still inside the span
-		target_h = max(0, _face_target_h - 1)
-	else:
-		target_h = _face_target_h
+## Raycast every frame against all collision layers to find the structure
+## under the cursor. Applies / removes the red highlight as the hover changes.
+func _update_delete_hover(screen_pos: Vector2) -> void:
+	var cam         := _cam_ctrl.get_camera()
+	var space_state := get_viewport().get_world_3d().direct_space_state
+	var ray_origin  := cam.project_ray_origin(screen_pos)
+	var ray_end     := ray_origin + cam.project_ray_normal(screen_pos) * 1000.0
+	# No mask argument → hits all collision layers
+	var result      := space_state.intersect_ray(
+		PhysicsRayQueryParameters3D.create(ray_origin, ray_end))
 
-	var cell := HexGrid.get_cell(target_hex)
-	if cell == null or not cell.stack.has(target_h):
-		print("No structure at (%d, %d) height %d" % [target_hex.x, target_hex.y, target_h])
-		return
-	HexGrid.despawn_structure(target_hex, target_h)
-	print("Deleted (face) at col=%d row=%d height=%d" % [target_hex.x, target_hex.y, target_h])
+	var found : StructureBase = null
+	if not result.is_empty():
+		found = _find_structure_base(result["collider"])
+
+	if found == _hovered_structure:
+		return   # nothing changed
+
+	_restore_delete_mats()
+	_hovered_structure = found
+	if found != null:
+		_apply_delete_highlight(found)
+
+## Tint every MeshInstance3D in `structure` with a red semi-transparent override.
+## Saves the previous material_override so it can be restored later.
+func _apply_delete_highlight(structure: Node3D) -> void:
+	for node in structure.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		_hover_saved_mats[mi] = mi.material_override
+		var mat := StandardMaterial3D.new()
+		mat.albedo_color = Color(1.0, 0.1, 0.1, 0.55)
+		mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		mi.material_override = mat
+
+## Restore all saved material_overrides without touching _hovered_structure.
+func _restore_delete_mats() -> void:
+	for mi: MeshInstance3D in _hover_saved_mats:
+		if is_instance_valid(mi):
+			mi.material_override = _hover_saved_mats[mi]
+	_hover_saved_mats.clear()
+
+## Full cleanup: restore materials and clear the hovered reference.
+## Call this when leaving delete mode or on tool change.
+func _clear_delete_highlight() -> void:
+	_restore_delete_mats()
+	_hovered_structure = null
+
+## Delete the hovered structure. Clears refs before despawn to avoid
+## accessing freed nodes (despawn calls on_removed → queue_free).
+func _do_delete_by_structure(structure: StructureBase) -> void:
+	_hover_saved_mats.clear()
+	_hovered_structure = null
+	var hex := structure.hex_position
+	var h   := structure.height_level
+	print("Deleted %s at col=%d row=%d height=%d" % [structure.structure_type, hex.x, hex.y, h])
+	HexGrid.despawn_structure(hex, h)
 
 func _do_delete(hex: Vector2i) -> void:
 	var top_h : int = HexGrid.get_top_height(hex)
@@ -464,6 +501,7 @@ func _do_eyedrop(hex: Vector2i) -> void:
 
 # ── Ghost preview ──────────────────────────────────────────────────────────────
 func _on_placement_changed() -> void:
+	_clear_delete_highlight()
 	_rebuild_ghost()
 
 func _rebuild_ghost() -> void:
