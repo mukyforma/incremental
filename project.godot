@@ -22,16 +22,26 @@ StructureRegistry="*res://StructureRegistry.gd"
 PlacementController="*res://autoloads/PlacementController.gd"
 SaveSystem="*res://SaveSystem.gd"
 LevelManager="*res://autoloads/LevelManager.gd"
+TubeJointRegistry="*res://autoloads/TubeJointRegistry.gd"
+RailCollisionManager="*res://autoloads/RailCollisionManager.gd"
+
+[display]
+
+window/size/viewport_width=1920
+window/size/viewport_height=1080
+window/size/mode=2
 
 [physics]
 
-3d/physics_engine="Jolt Physics"
+3d/physics_engine="Rapier3D"
 jolt_physics_3d/simulation/velocity_steps=8
 jolt_physics_3d/simulation/position_steps=4
-3d/default_gravity=14.0
-3d/default_linear_damp=0.0
-3d/default_angular_damp=0.0
-3d/solver/solver_iterations=8
+3d/default_gravity_vector=Vector3(0, -3, 0)
+rapier/solver/preset=2
+rapier/solver/num_internal_pgs_iterations=4
+rapier/solver/num_internal_stabilization_iterations=4
+rapier/solver/contact_damping_ratio=20.0
+rapier/solver/contact_natural_frequency=60.0
 
 [rendering]
 
