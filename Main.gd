@@ -31,6 +31,11 @@ var _face_is_top     : bool     = false
 var _face_target_hex : Vector2i = Vector2i.ZERO
 var _face_target_h   : int      = 0
 
+## Hex of the SolidHex that was actually hit (lateral face only).
+## Distinct from _face_target_hex, which is the adjacent hex where the new
+## structure will be placed. The debug rectangle belongs on this side.
+var _face_source_hex : Vector2i = Vector2i.ZERO
+
 # ── Part 2: TubeJoint snap state ───────────────────────────────────────────────
 const SNAP_DISTANCE : float = 0.25
 
@@ -225,8 +230,12 @@ func _update_hover(screen_pos: Vector2) -> void:
 			# Lateral face: step 0.1 m along the normal into the adjacent hex cell
 			var adjacent_point := _face_hit_pos + _face_hit_normal * 0.1
 			_face_target_hex = HexGrid.world_to_hex(adjacent_point)
-			# Snap to the nearest valid height level (round, not truncate)
+			# Snap to the nearest valid height level (floor, not round)
 			_face_target_h   = max(0, HexGrid.world_to_height_level(_face_hit_pos.y))
+			# Record the source hex (the hit solid) for the debug rectangle
+			var hit_struct := _find_structure_base(face_result["collider"])
+			_face_source_hex = hit_struct.hex_position if hit_struct != null \
+				else HexGrid.world_to_hex(_face_hit_pos)
 
 		_face_active = true
 		_renderer.set_hover(_face_target_hex)
@@ -318,7 +327,7 @@ func _push_debug_state() -> void:
 	_debug_node.set_face_state(
 		_face_active, _face_is_top,
 		_face_hit_pos, _face_hit_normal,
-		_face_target_hex, _face_target_h,
+		_face_target_hex, _face_source_hex, _face_target_h,
 		can_place)
 
 	var snap_delta : float = 0.0
@@ -464,9 +473,9 @@ func _apply_delete_highlight(structure: Node3D) -> void:
 
 ## Restore all saved material_overrides without touching _hovered_structure.
 func _restore_delete_mats() -> void:
-	for mi: MeshInstance3D in _hover_saved_mats:
+	for mi in _hover_saved_mats:          # untyped — cast after validity check
 		if is_instance_valid(mi):
-			mi.material_override = _hover_saved_mats[mi]
+			(mi as MeshInstance3D).material_override = _hover_saved_mats[mi]
 	_hover_saved_mats.clear()
 
 ## Full cleanup: restore materials and clear the hovered reference.

@@ -24,6 +24,9 @@ var _is_top        : bool      = false
 var _hit_pos       : Vector3   = Vector3.ZERO
 var _hit_normal    : Vector3   = Vector3.UP
 var _target_hex    : Vector2i  = Vector2i.ZERO
+## Hex of the SolidHex that was hit (lateral only). The debug rectangle is
+## drawn on this side, not on the adjacent target hex.
+var _source_hex    : Vector2i  = Vector2i.ZERO
 var _target_height : int       = 0
 var _can_place     : bool      = false
 
@@ -86,6 +89,7 @@ func set_face_state(
 		hit_pos:       Vector3,
 		hit_normal:    Vector3,
 		target_hex:    Vector2i,
+		source_hex:    Vector2i,
 		target_height: int,
 		can_place:     bool) -> void:
 	_active        = active
@@ -93,6 +97,7 @@ func set_face_state(
 	_hit_pos       = hit_pos
 	_hit_normal    = hit_normal
 	_target_hex    = target_hex
+	_source_hex    = source_hex
 	_target_height = target_height
 	_can_place     = can_place
 
@@ -131,7 +136,7 @@ func _process(_delta: float) -> void:
 	if _is_top:
 		_draw_hex_outline(_hit_pos + Vector3.UP * 0.01, face_color)
 	else:
-		_draw_lateral_outline(_hit_pos, _hit_normal, _target_hex, _target_height, face_color)
+		_draw_lateral_outline(_hit_pos, _hit_normal, _source_hex, _target_height, face_color)
 
 	# Registered TubeJoint positions (CYAN)
 	for jp: Vector3 in TubeJointRegistry.get_all_joint_positions():
@@ -191,21 +196,21 @@ func _draw_hex_outline(world_pos: Vector3, mat: StandardMaterial3D) -> void:
 	_imesh.surface_end()
 
 ## Rectangle outline for a lateral face, snapped to the exact face center in
-## all three axes: XZ is the hex-center + face-normal-XZ * apothem (0.866),
+## all three axes: XZ is source_hex_center + face-normal-XZ * apothem (0.866),
 ## Y is the middle of the snapped height band.
+## source_hex is the hex of the SolidHex that was hit (NOT the target hex).
 func _draw_lateral_outline(
 		hit_pos:        Vector3,
 		normal:         Vector3,
-		target_hex:     Vector2i,
+		source_hex:     Vector2i,
 		snapped_height: int,
 		mat:            StandardMaterial3D) -> void:
 	var up_ref  := Vector3.UP if absf(normal.dot(Vector3.UP)) < 0.9 else Vector3.FORWARD
 	var right   := normal.cross(up_ref).normalized()
 	var up_dir  := normal.cross(right).normalized()
-	# Project the normal onto XZ, normalize, then step from the hex center to
-	# the lateral face center (apothem of a flat-top hex = HEX_SIZE * cos30° ≈ 0.866)
+	# Step from the source hex center along the face normal to reach the face midpoint
 	var normal_xz      := Vector3(normal.x, 0.0, normal.z).normalized()
-	var hex_center_xz  := HexGrid.hex_to_world(target_hex)   # y = 0; only XZ used
+	var hex_center_xz  := HexGrid.hex_to_world(source_hex)   # y = 0; only XZ used
 	var center_y       := snapped_height * HexGrid.UNIT_HEIGHT + HexGrid.UNIT_HEIGHT * 0.5
 	var center         := Vector3(
 		hex_center_xz.x + normal_xz.x * 0.866,
