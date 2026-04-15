@@ -329,8 +329,11 @@ const HEIGHT_SPANS: Dictionary = {
 
 ## Converts a world-space Y coordinate to the nearest stack height level.
 ## Used by face-based placement when hovering a lateral SolidHex face.
+## Returns the height level that fully contains world_y.
+## Uses floor so the level only advances when the hit point crosses a level
+## boundary (a multiple of UNIT_HEIGHT), not at the halfway point.
 func world_to_height_level(world_y: float) -> int:
-	return int(round(world_y / UNIT_HEIGHT))
+	return max(0, int(floor(world_y / UNIT_HEIGHT)))
 
 ## Returns true if a solid structure may be placed at (hex, height).
 ## Rules (any one is sufficient):

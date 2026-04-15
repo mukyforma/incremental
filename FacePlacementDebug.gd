@@ -131,7 +131,7 @@ func _process(_delta: float) -> void:
 	if _is_top:
 		_draw_hex_outline(_hit_pos + Vector3.UP * 0.01, face_color)
 	else:
-		_draw_lateral_outline(_hit_pos, _hit_normal, _target_height, face_color)
+		_draw_lateral_outline(_hit_pos, _hit_normal, _target_hex, _target_height, face_color)
 
 	# Registered TubeJoint positions (CYAN)
 	for jp: Vector3 in TubeJointRegistry.get_all_joint_positions():
@@ -190,17 +190,27 @@ func _draw_hex_outline(world_pos: Vector3, mat: StandardMaterial3D) -> void:
 		_imesh.surface_add_vertex(ctr + Vector3(cos(a1) * s, 0.0, sin(a1) * s))
 	_imesh.surface_end()
 
-## Rectangle outline for a lateral face, vertically centred on `snapped_height`.
+## Rectangle outline for a lateral face, snapped to the exact face center in
+## all three axes: XZ is the hex-center + face-normal-XZ * apothem (0.866),
+## Y is the middle of the snapped height band.
 func _draw_lateral_outline(
 		hit_pos:        Vector3,
 		normal:         Vector3,
+		target_hex:     Vector2i,
 		snapped_height: int,
 		mat:            StandardMaterial3D) -> void:
 	var up_ref  := Vector3.UP if absf(normal.dot(Vector3.UP)) < 0.9 else Vector3.FORWARD
 	var right   := normal.cross(up_ref).normalized()
 	var up_dir  := normal.cross(right).normalized()
-	var center_y := snapped_height * HexGrid.UNIT_HEIGHT + HexGrid.UNIT_HEIGHT * 0.5
-	var center   := Vector3(hit_pos.x, center_y, hit_pos.z)
+	# Project the normal onto XZ, normalize, then step from the hex center to
+	# the lateral face center (apothem of a flat-top hex = HEX_SIZE * cos30° ≈ 0.866)
+	var normal_xz      := Vector3(normal.x, 0.0, normal.z).normalized()
+	var hex_center_xz  := HexGrid.hex_to_world(target_hex)   # y = 0; only XZ used
+	var center_y       := snapped_height * HexGrid.UNIT_HEIGHT + HexGrid.UNIT_HEIGHT * 0.5
+	var center         := Vector3(
+		hex_center_xz.x + normal_xz.x * 0.866,
+		center_y,
+		hex_center_xz.z + normal_xz.z * 0.866)
 	var hw := HexGrid.HEX_SIZE * 0.5
 	var hh := HexGrid.UNIT_HEIGHT * 0.5
 	var tl := center + up_dir *  hh - right * hw
