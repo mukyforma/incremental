@@ -1,6 +1,7 @@
 class_name CameraController
 extends Node3D
 
+@export var _camera : Camera3D
 # ── Exported config (tweak in Inspector) ───────────────────────────────────────
 @export_group("Pan & Move")
 @export var pan_speed   : float = 0.003  ## World units per pixel when dragging
@@ -13,7 +14,7 @@ extends Node3D
 
 @export_group("Zoom")
 @export var zoom_step : float = 1.25     ## Zoom multiplier per scroll tick
-@export var zoom_min  : float = 4.0      ## Orthographic size (smaller = closer)
+@export var zoom_min  : float = 1.0      ## Orthographic size (smaller = closer)
 @export var zoom_max  : float = 40.0
 
 @export_group("Initial View")
@@ -22,7 +23,6 @@ extends Node3D
 @export var initial_yaw     : float = 45.0  ## Starting horizontal rotation in degrees
 
 # ── State ──────────────────────────────────────────────────────────────────────
-var _camera        : Camera3D
 var _pivot         : Vector3 = Vector3.ZERO   # target pivot (set by input)
 var _pivot_smooth  : Vector3 = Vector3.ZERO   # visually interpolated pivot
 var _ortho_size    : float                    # current zoom (Camera3D.size)
@@ -37,9 +37,10 @@ var _yaw_origin    : float   = 0.0
 
 # ── Setup ──────────────────────────────────────────────────────────────────────
 func _ready() -> void:
-	_camera = Camera3D.new()
+	if _camera == null:
+		push_error("CameraController: _camera export is not set.")
+		return
 	_camera.projection = Camera3D.PROJECTION_ORTHOGONAL
-	add_child(_camera)
 	_ortho_size = initial_zoom
 	_yaw        = initial_yaw
 	_yaw_smooth = initial_yaw

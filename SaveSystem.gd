@@ -70,6 +70,13 @@ func load_save(save_name: String) -> Array:
 	if not (data is Dictionary) or not data.has("structures"):
 		push_error("SaveSystem: formato inválido em " + path)
 		return []
+
+	const CURRENT_VERSION = 1
+	var version = data.get("version", 0)
+	if version != CURRENT_VERSION:
+		push_warning("SaveSystem: save file version %d does not match current version %d. Data may be incompatible." % [version, CURRENT_VERSION])
+		return []
+
 	return data["structures"]
 
 # lista

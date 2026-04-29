@@ -45,6 +45,27 @@ func _ready() -> void:
 	root.add_child(title)
 	root.add_child(HSeparator.new())
 
+	# ── Volume control ─────────────────────────────────────────────────────────
+	var vol_row := HBoxContainer.new()
+	vol_row.add_theme_constant_override("separation", 10)
+	root.add_child(vol_row)
+
+	var vol_lbl := Label.new()
+	vol_lbl.text = "Volume"
+	vol_lbl.custom_minimum_size.x = 60
+	vol_row.add_child(vol_lbl)
+
+	var slider := HSlider.new()
+	slider.min_value = 0.0
+	slider.max_value = 1.0
+	slider.step      = 0.01
+	slider.value     = db_to_linear(AudioServer.get_bus_volume_db(AudioServer.get_bus_index("Master")))
+	slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	slider.value_changed.connect(_on_volume_changed)
+	vol_row.add_child(slider)
+
+	root.add_child(HSeparator.new())
+
 	# ── Main buttons ───────────────────────────────────────────────────────────
 	_main_btns = VBoxContainer.new()
 	_main_btns.add_theme_constant_override("separation", 8)
@@ -134,6 +155,11 @@ func _refresh_save_list() -> void:
 func _on_load_selected(save_name: String) -> void:
 	hide_menu()
 	loaded.emit(save_name)
+
+# ── Volume ─────────────────────────────────────────────────────────────────────
+
+func _on_volume_changed(value: float) -> void:
+	AudioManager.set_sfx_volume(linear_to_db(value))
 
 # ── Helpers ────────────────────────────────────────────────────────────────────
 

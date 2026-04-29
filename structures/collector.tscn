@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bq7si5xyyjal6"]
+
+[ext_resource type="PackedScene" uid="uid://di2v1o5ycsf6r" path="res://assets/meshes/collector.glb" id="1_m4ktu"]
+[ext_resource type="Script" uid="uid://dcollectorgd" path="res://structures/Collector.gd" id="1_script"]
+[ext_resource type="PackedScene" uid="uid://cfaeftenu6wgs" path="res://assets/meshes/CenterStar.glb" id="3_t2yw6"]
+[ext_resource type="PackedScene" uid="uid://c326uetoej478" path="res://components/sound_component.tscn" id="4_22e0s"]
+[ext_resource type="AudioStream" uid="uid://bahijtl0n4lnt" path="res://assets/sounds/Collector.wav" id="5_cvmtp"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_60mxp"]
+height = 0.43057632
+radius = 0.28076172
+
+[node name="Collector" type="Node3D" unique_id=1397335443]
+script = ExtResource("1_script")
+activatable = true
+
+[node name="collector" parent="." unique_id=432491085 instance=ExtResource("1_m4ktu")]
+
+[node name="DeliveryArea" type="Area3D" parent="." unique_id=1025197909]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DeliveryArea" unique_id=1303844476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28066838, 0)
+shape = SubResource("CylinderShape3D_60mxp")
+
+[node name="CenterStar2" parent="." unique_id=796921387 instance=ExtResource("3_t2yw6")]
+
+[node name="SoundComponent" parent="." unique_id=1298882914 instance=ExtResource("4_22e0s")]
+sound = ExtResource("5_cvmtp")
+
+[connection signal="activated" from="." to="SoundComponent" method="_on_collector_activated"]

@@ -101,17 +101,21 @@ func set_face_state(
 	_target_height = target_height
 	_can_place     = can_place
 
+var _joint_positions: Array[Vector3] = []
+
 func set_snap_state(
-		is_snapping:    bool,
-		snap_delta:     float,
-		ghost_joints:   Array[Vector3],
-		ghost_snapping: Vector3,
-		target_joint:   Vector3) -> void:
+		is_snapping:     bool,
+		snap_delta:      float,
+		ghost_joints:    Array[Vector3],
+		ghost_snapping:  Vector3,
+		target_joint:    Vector3,
+		joint_positions: Array[Vector3] = []) -> void:
 	_is_snapping       = is_snapping
 	_snap_delta        = snap_delta
 	_ghost_joints      = ghost_joints
 	_snap_joint_ghost  = ghost_snapping
 	_snap_joint_target = target_joint
+	_joint_positions   = joint_positions
 
 # ── Draw loop ──────────────────────────────────────────────────────────────────
 func _process(_delta: float) -> void:
@@ -139,7 +143,7 @@ func _process(_delta: float) -> void:
 		_draw_lateral_outline(_hit_pos, _hit_normal, _source_hex, _target_height, face_color)
 
 	# Registered TubeJoint positions (CYAN)
-	for jp: Vector3 in TubeJointRegistry.get_all_joint_positions():
+	for jp: Vector3 in _joint_positions:
 		_add_sphere(jp, 0.06, _mat_cyan)
 
 	# Ghost TubeJoint positions (YELLOW)
@@ -196,7 +200,7 @@ func _draw_hex_outline(world_pos: Vector3, mat: StandardMaterial3D) -> void:
 	_imesh.surface_end()
 
 ## Rectangle outline for a lateral face, snapped to the exact face center in
-## all three axes: XZ is source_hex_center + face-normal-XZ * apothem (0.866),
+## all three axes: XZ is source_hex_center + face-normal-XZ * 0.766,
 ## Y is the middle of the snapped height band.
 ## source_hex is the hex of the SolidHex that was hit (NOT the target hex).
 func _draw_lateral_outline(
@@ -213,9 +217,9 @@ func _draw_lateral_outline(
 	var hex_center_xz  := HexGrid.hex_to_world(source_hex)   # y = 0; only XZ used
 	var center_y       := snapped_height * HexGrid.UNIT_HEIGHT + HexGrid.UNIT_HEIGHT * 0.5
 	var center         := Vector3(
-		hex_center_xz.x + normal_xz.x * 0.866,
+		hex_center_xz.x + normal_xz.x * 0.766,
 		center_y,
-		hex_center_xz.z + normal_xz.z * 0.866)
+		hex_center_xz.z + normal_xz.z * 0.766)
 	var hw := HexGrid.HEX_SIZE * 0.5
 	var hh := HexGrid.UNIT_HEIGHT * 0.5
 	var tl := center + up_dir *  hh - right * hw

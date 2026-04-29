@@ -11,6 +11,7 @@ const SEAT_HEIGHT:   float = 0.05
 var _top_marble: RigidBody3D = null
 
 @onready var _gate_area: Area3D = $GateArea
+@onready var _marble_spawn: Node3D = $MarbleSpawn
 
 # ── StructureBase hooks ────────────────────────────────────────────────────────
 
@@ -21,15 +22,9 @@ func on_placed() -> void:
 	_top_marble = _MARBLE_SCENE.instantiate() as RigidBody3D
 	add_child(_top_marble)
 	_top_marble.freeze = true
-	# Sit the marble on top of the arch cup:
-	# arch center (2*UNIT_HEIGHT) + arch radius + seat height + marble radius
-	_top_marble.position = Vector3(
-		0.0,
-		2.0 * HexGrid.UNIT_HEIGHT + ARCH_RADIUS + SEAT_HEIGHT + MARBLE_RADIUS,
-		0.0
-	)
+	_top_marble.position = _marble_spawn.position
 	_gate_area.body_entered.connect(_on_body_entered_gate)
-	LevelManager.register_speed_gate(self)
+	StructureEvents.structure_placed.emit(self)
 
 func on_removed() -> void:
 	if is_instance_valid(_top_marble):
@@ -55,5 +50,5 @@ func _launch_top_marble(trigger_speed: float) -> void:
 	# Subsequent passes: it already lives in the parent scene, just re-impulse it.
 	if _top_marble.get_parent() == self:
 		_top_marble.freeze = false
-		_top_marble.reparent(get_parent())
+		StructureEvents.reparent_requested.emit(_top_marble, get_parent())
 	_top_marble.apply_central_impulse(Vector3.UP * trigger_speed * 2.0)

@@ -6,22 +6,48 @@ const STRUCTURE_BTN_SCENE := preload("res://ui/StructureButton.tscn")
 const TOOL_BTN_SCENE      := preload("res://ui/ToolButton.tscn")
 
 # ── Config ─────────────────────────────────────────────────────────────────────
-const PADDING       : float = 12.0
-const ROW_SPACING   : float = 6.0
 const BTN_SPACING   : int   = 8
-const PANEL_COLOR   : Color = Color(0.10, 0.10, 0.12, 0.85)
-const BORDER_COLOR  : Color = Color(0.22, 0.22, 0.25, 1.0)
 const MARGIN_BOTTOM : float = 12.0
 
-var _panel: PanelContainer
+const _STRUCTURE_CONFIGS := [
+	[&"marble_spawn",  "1", 1.0],
+	[&"launch_cannon", "2", 1.2],
+	[&"solid1",        "3", 2.0],
+	[&"solid2",        "4", 2.0],
+	[&"solid4",        "5", 2.0],
+	[&"reto",          "6", 2.0],
+	[&"curva60",       "7", 2.0],
+	[&"curva120",      "8", 2.0],
+	[&"rampa1",        "9", 2.0],
+	[&"rampa2",        "",  2.5],
+	[&"solid8",        "",  5.0],
+	[&"speed_gate",    "0", 1.5],
+	[&"collector",     "",  1.5],
+]
+
+const _NEW_STRUCTURE_CONFIGS := [
+	[&"deflector_alto",  "", 3.0],
+	[&"deflector_baixo", "", 3.0],
+	[&"impulsor_raso",   "", 2.0],
+	[&"impulsor_medio",  "", 2.0],
+	[&"impulsor_alto",   "", 2.0],
+	[&"comutador",       "", 2.5],
+]
+
+# action_name → structure_type; populated by _build_structure_row
+var _structure_shortcuts: Dictionary = {}
+
+# ── Node refs (built in HUD.tscn) ──────────────────────────────────────────────
+@onready var _panel : PanelContainer = $PanelContainer
+@onready var _vbox  : VBoxContainer  = $PanelContainer/MarginContainer/VBoxContainer
 
 # ── Lifecycle ──────────────────────────────────────────────────────────────────
 func _ready() -> void:
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	_panel = _build_panel()
-	add_child(_panel)
+	_vbox.add_child(_build_structure_row())
+	_vbox.add_child(_build_tool_row())
 
 	get_tree().root.size_changed.connect(_reposition)
 	call_deferred("_reposition")
@@ -36,65 +62,49 @@ func _reposition() -> void:
 		vp.y - _panel.size.y - MARGIN_BOTTOM
 	)
 
-func _build_panel() -> PanelContainer:
-	var panel := PanelContainer.new()
-	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-
-	var style := StyleBoxFlat.new()
-	style.bg_color                   = PANEL_COLOR
-	style.corner_radius_top_left     = 10
-	style.corner_radius_top_right    = 10
-	style.corner_radius_bottom_left  = 10
-	style.corner_radius_bottom_right = 10
-	style.border_color               = BORDER_COLOR
-	style.border_width_left          = 1
-	style.border_width_right         = 1
-	style.border_width_top           = 1
-	style.border_width_bottom        = 1
-	panel.add_theme_stylebox_override("panel", style)
-
-	var margin := MarginContainer.new()
-	margin.add_theme_constant_override("margin_left",   int(PADDING))
-	margin.add_theme_constant_override("margin_right",  int(PADDING))
-	margin.add_theme_constant_override("margin_top",    int(PADDING))
-	margin.add_theme_constant_override("margin_bottom", int(PADDING))
-	panel.add_child(margin)
-
-	var vbox := VBoxContainer.new()
-	vbox.add_theme_constant_override("separation", int(ROW_SPACING))
-	margin.add_child(vbox)
-
-	vbox.add_child(_build_structure_row())
-	vbox.add_child(_build_tool_row())
-
-	return panel
-
 # ── Structure row ──────────────────────────────────────────────────────────────
 func _build_structure_row() -> HBoxContainer:
 	var row := _make_hbox()
 	var group := ButtonGroup.new()
 
-	var configs := [
-		[&"marble_spawn",  "1", 1.0],
-		[&"launch_cannon", "2", 1.2],
-		[&"solid1",        "3", 2.0],
-		[&"solid2",        "4", 2.0],
-		[&"solid4",        "5", 2.0],
-		[&"reto",          "6", 2.0],
-		[&"curva60",       "7", 2.0],
-		[&"curva120",      "8", 2.0],
-		[&"rampa1",        "9", 2.0],
-		[&"rampa2",        "",  2.5],
-		[&"solid8",        "",  5.0],
-		[&"speed_gate",    "0", 1.5],
-	]
-	for cfg in configs:
+	if StructureCatalog.definitions.size() > 0:
+		for def in StructureCatalog.get_all():
+			var btn: StructureButton = STRUCTURE_BTN_SCENE.instantiate()
+			btn.structure_type = def.type
+			btn.shortcut_key   = def.shortcut_key
+			btn.button_group   = group
+			row.add_child(btn)
+			if def.shortcut_key != "":
+				_structure_shortcuts["select_" + def.shortcut_key] = def.type
+		return row
+
+	# Fallback: class-level config arrays
+	for cfg in _STRUCTURE_CONFIGS:
 		var btn: StructureButton = STRUCTURE_BTN_SCENE.instantiate()
 		btn.structure_type   = cfg[0]
 		btn.shortcut_key     = cfg[1]
 		btn.preview_cam_size = cfg[2]
 		btn.button_group     = group
 		row.add_child(btn)
+		if cfg[1] != "":
+			_structure_shortcuts["select_" + cfg[1]] = cfg[0]
+
+	# ── Separator between original and new structures ──────────────────────
+	var sep := VSeparator.new()
+	sep.add_theme_constant_override("separation", 4)
+	sep.custom_minimum_size = Vector2(2, 0)
+	row.add_child(sep)
+
+	# ── New unlockable structures ──────────────────────────────────────────
+	for cfg in _NEW_STRUCTURE_CONFIGS:
+		var btn: StructureButton = STRUCTURE_BTN_SCENE.instantiate()
+		btn.structure_type   = cfg[0]
+		btn.shortcut_key     = cfg[1]
+		btn.preview_cam_size = cfg[2]
+		btn.button_group     = group
+		row.add_child(btn)
+		if cfg[1] != "":
+			_structure_shortcuts["select_" + cfg[1]] = cfg[0]
 
 	return row
 
@@ -130,23 +140,21 @@ func _make_hbox() -> HBoxContainer:
 func _unhandled_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	var handled := true
-	match event.keycode:
-		KEY_1: PlacementController.set_structure(&"marble_spawn")
-		KEY_2: PlacementController.set_structure(&"launch_cannon")
-		KEY_3: PlacementController.set_structure(&"solid1")
-		KEY_4: PlacementController.set_structure(&"solid2")
-		KEY_5: PlacementController.set_structure(&"solid4")
-		KEY_6: PlacementController.set_structure(&"reto")
-		KEY_7: PlacementController.set_structure(&"curva60")
-		KEY_8: PlacementController.set_structure(&"curva120")
-		KEY_9: PlacementController.set_structure(&"rampa1")
-		KEY_0: PlacementController.set_structure(&"speed_gate")
-		KEY_Q: PlacementController.rotate_ccw()
-		KEY_E: PlacementController.rotate_cw()
-		KEY_B: PlacementController.set_tool(&"build")
-		KEY_X: PlacementController.set_tool(&"delete")
-		KEY_C: PlacementController.set_tool(&"eyedropper")
-		_:     handled = false
-	if handled:
-		get_viewport().set_input_as_handled()
+	for action in _structure_shortcuts:
+		if event.is_action_pressed(action):
+			PlacementController.set_structure(_structure_shortcuts[action])
+			get_viewport().set_input_as_handled()
+			return
+	if event.is_action_pressed("build_rotate_ccw"):
+		PlacementController.rotate_ccw()
+	elif event.is_action_pressed("tool_eyedrop"):
+		PlacementController.rotate_cw()
+	elif event.is_action_pressed("tool_build"):
+		PlacementController.set_tool(&"build")
+	elif event.is_action_pressed("tool_delete"):
+		PlacementController.set_tool(&"delete")
+	elif event.is_action_pressed("tool_cancel"):
+		PlacementController.set_tool(&"eyedropper")
+	else:
+		return
+	get_viewport().set_input_as_handled()

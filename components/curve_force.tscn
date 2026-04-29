@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://curveforce_scene"]
+
+[ext_resource type="Script" uid="uid://curveforce_script" path="res://components/CurveForce.gd" id="1_script"]
+
+[node name="CurveForce" type="Node3D"]
+script = ExtResource("1_script")

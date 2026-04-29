@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://gdv6i0tgwdwh"]
+
+[ext_resource type="PackedScene" uid="uid://r415ps8dvgi5" path="res://assets/meshes/comutadorBase.glb" id="1_ta6pu"]
+
+[node name="ComutadorBase" type="Node3D" unique_id=1228809444]
+
+[node name="Model" parent="." unique_id=174686211 instance=ExtResource("1_ta6pu")]

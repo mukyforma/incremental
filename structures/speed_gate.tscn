@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://spgate"]
 
 [ext_resource type="Script" uid="uid://dspgate" path="res://structures/SpeedGate.gd" id="1_sgate"]
-[ext_resource type="PackedScene" uid="uid://dh6gvyib0mvmi" path="res://assets/speedGate.glb" id="2_b33go"]
+[ext_resource type="PackedScene" uid="uid://dh6gvyib0mvmi" path="res://assets/meshes/speedGate.glb" id="2_b33go"]
 
 [sub_resource type="BoxShape3D" id="BoxShape_gate"]
 size = Vector3(0.36595458, 0.29888612, 0.62474364)
@@ -16,4 +16,15 @@ transform = Transform3D(0.8660254, 0, 0.5, 0, 1, 0, -0.5, 0, 0.8660254, 0, 0.283
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.012213105, -0.06966092, -0.024407983)
 shape = SubResource("BoxShape_gate")
 
-[node name="speedGate" parent="." unique_id=1541483407 instance=ExtResource("2_b33go")]
+[node name="speedGate" parent="." unique_id=743092789 instance=ExtResource("2_b33go")]
+
+[node name="MarbleSpawn" type="Marker3D" parent="." unique_id=657916372]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0063369, 0)
+
+[node name="Entry_E1_H0" type="Marker3D" parent="." unique_id=473914000]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5922738e-17, 0, 0.75)
+gizmo_extents = 0.15
+
+[node name="Entry_E4_H0" type="Marker3D" parent="." unique_id=1090121310]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3776821e-16, 0, -0.75)
+gizmo_extents = 0.15

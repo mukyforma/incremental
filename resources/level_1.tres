@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="LevelData" format=3 uid="uid://l5duafeb7fv6"]
+
+[ext_resource type="Script" uid="uid://b77rl5nt8jew1" path="res://resources/ObjectiveData.gd" id="1_3n4gr"]
+[ext_resource type="Script" uid="uid://bvcxu42f8234s" path="res://resources/LevelData.gd" id="2_cxqhe"]
+
+[resource]
+script = ExtResource("2_cxqhe")
+level_name = "Act 1"
+metadata/_custom_type_script = "uid://bvcxu42f8234s"

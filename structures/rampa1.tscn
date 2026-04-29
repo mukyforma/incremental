@@ -1,10 +1,18 @@
 [gd_scene format=3 uid="uid://rampa1wrap"]
 
 [ext_resource type="Script" uid="uid://ci7hdst4sfqal" path="res://StructureBase.gd" id="1_base"]
-[ext_resource type="PackedScene" uid="uid://c87leyb8r06cl" path="res://assets/rampa1.glb" id="2_glb"]
+[ext_resource type="PackedScene" uid="uid://c87leyb8r06cl" path="res://assets/meshes/rampa1.glb" id="2_glb"]
 
 [node name="rampa1" type="Node3D" unique_id=771988937]
 script = ExtResource("1_base")
 is_rail = true
 
-[node name="Model" parent="." unique_id=1137522990 instance=ExtResource("2_glb")]
+[node name="Model" parent="." unique_id=1036033724 instance=ExtResource("2_glb")]
+
+[node name="Entry_E1_H0" type="Marker3D" parent="." unique_id=1376152225]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5922738e-17, 0, 0.75)
+gizmo_extents = 0.15
+
+[node name="Entry_E4_H1" type="Marker3D" parent="." unique_id=163720896]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3776821e-16, 0.289, -0.75)
+gizmo_extents = 0.15

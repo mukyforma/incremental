@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://ci7hdst4sfqal" path="res://StructureBase.gd" id="1"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_1"]
+size = Vector3(0.08, 0.08, 2.6)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_1"]
+size = Vector3(0.08, 0.08, 2.6)
+
+[node name="rail_medium" type="Node3D"]
+script = ExtResource("1")
+is_rail = true
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_1")
+
+[node name="Body" type="StaticBody3D" parent="."]
+
+[node name="Collision" type="CollisionShape3D" parent="Body"]
+shape = SubResource("BoxShape3D_1")

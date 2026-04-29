@@ -1,10 +1,18 @@
 [gd_scene format=3 uid="uid://retowrap"]
 
 [ext_resource type="Script" uid="uid://ci7hdst4sfqal" path="res://StructureBase.gd" id="1_base"]
-[ext_resource type="PackedScene" uid="uid://qjybrtxx0f0h" path="res://assets/reto.glb" id="2_glb"]
+[ext_resource type="PackedScene" uid="uid://qjybrtxx0f0h" path="res://assets/meshes/reto.glb" id="2_glb"]
 
 [node name="reto" type="Node3D" unique_id=1968997546]
 script = ExtResource("1_base")
 is_rail = true
 
 [node name="Model" parent="." unique_id=1227696660 instance=ExtResource("2_glb")]
+
+[node name="Entry_E1_H0" type="Marker3D" parent="." unique_id=1874609788]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5922738e-17, 0, 0.75)
+gizmo_extents = 0.15
+
+[node name="Entry_E4_H0" type="Marker3D" parent="." unique_id=29832450]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3776821e-16, 0, -0.75)
+gizmo_extents = 0.15

@@ -1,0 +1,44 @@
+[gd_scene format=3 uid="uid://defl_bxo"]
+
+[ext_resource type="Script" path="res://StructureBase.gd" uid="uid://sbase" id="1_base"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_steelblue"]
+albedo_color = Color(0.274, 0.510, 0.706, 1.0)
+roughness = 0.45
+metallic = 0.35
+
+[sub_resource type="CylinderMesh" id="CylMesh_vert"]
+top_radius = 0.3
+bottom_radius = 0.3
+height = 2.0
+radial_segments = 16
+
+[sub_resource type="CylinderMesh" id="CylMesh_arm"]
+top_radius = 0.15
+bottom_radius = 0.15
+height = 1.0
+radial_segments = 12
+
+[sub_resource type="CylinderShape3D" id="CylShape_body"]
+height = 2.0
+radius = 0.3
+
+[node name="DeflectorBaixo" type="Node3D"]
+script = ExtResource("1_base")
+is_rail = true
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+
+[node name="Body" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+material_override = SubResource("Mat_steelblue")
+mesh = SubResource("CylMesh_vert")
+
+[node name="ExitArm" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.1, -0.5)
+material_override = SubResource("Mat_steelblue")
+mesh = SubResource("CylMesh_arm")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("CylShape_body")

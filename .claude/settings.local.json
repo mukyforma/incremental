@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls C:/Users/gacoda/Documents/marble/*.gd C:/Users/gacoda/Documents/marble/*.tscn C:/Users/gacoda/Documents/marble/project.godot)",
+      "Bash(grep -E \"\\\\.\\(gd|tscn\\)$\")",
+      "Bash(xargs grep:*)",
+      "Bash(xargs ls:*)",
+      "Bash(gh repo:*)",
+      "Bash(grep -E \"\\\\.gd$\")"
+    ]
+  }
+}

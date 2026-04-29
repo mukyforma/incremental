@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://solid1wrap"]
 
 [ext_resource type="Script" uid="uid://ci7hdst4sfqal" path="res://StructureBase.gd" id="1_base"]
-[ext_resource type="PackedScene" uid="uid://bcdwfwr040ygt" path="res://assets/solid1.glb" id="2_glb"]
+[ext_resource type="PackedScene" uid="uid://bcdwfwr040ygt" path="res://assets/meshes/solid1.glb" id="2_glb"]
 
-[node name="solid1" type="Node3D"]
+[node name="solid1" type="Node3D" unique_id=1177038538]
 script = ExtResource("1_base")
 
-[node name="Model" parent="." instance=ExtResource("2_glb")]
+[node name="Model" parent="." unique_id=2104650413 instance=ExtResource("2_glb")]

@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://comutdr"]
+
+[ext_resource type="Script" uid="uid://golqt24x4n58" path="res://structures/Comutador.gd" id="1_comutdr"]
+[ext_resource type="PackedScene" uid="uid://dm43u4cuiod3u" path="res://assets/meshes/comutador.glb" id="2_7qayg"]
+[ext_resource type="PackedScene" uid="uid://gdv6i0tgwdwh" path="res://structures/comutador_base.tscn" id="3_base"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_2uc1g"]
+height = 0.02903366
+radius = 0.5756836
+
+[node name="Comutador" type="Node3D" unique_id=15826010]
+script = ExtResource("1_comutdr")
+base_scene = ExtResource("3_base")
+
+[node name="SensorArea" type="Area3D" parent="." unique_id=1803929761]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="SensorArea" unique_id=1767914504]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1397686, 0)
+shape = SubResource("CylinderShape3D_2uc1g")
+
+[node name="Model" parent="." unique_id=1169119784 instance=ExtResource("2_7qayg")]

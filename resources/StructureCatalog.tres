@@ -1,0 +1,123 @@
+[gd_resource type="Resource" script_class="StructureCatalogData" format=3 uid="uid://bqhawhvngpt4j"]
+
+[ext_resource type="Script" uid="uid://c04en71ugoacy" path="res://resources/StructureDefinition.gd" id="1_4vos3"]
+[ext_resource type="Script" uid="uid://cglkmgif6j4u1" path="res://resources/StructureCatalogData.gd" id="2_3u711"]
+[ext_resource type="PackedScene" uid="uid://mbsp" path="res://structures/marble_spawn.tscn" id="2_c4nah"]
+[ext_resource type="PackedScene" uid="uid://bq7si5xyyjal6" path="res://structures/collector.tscn" id="2_v4ofo"]
+[ext_resource type="PackedScene" uid="uid://spgate" path="res://structures/speed_gate.tscn" id="4_kxocf"]
+[ext_resource type="PackedScene" uid="uid://solid1wrap" path="res://structures/solid1.tscn" id="5_f0nf4"]
+[ext_resource type="PackedScene" uid="uid://solid2wrap" path="res://structures/solid2.tscn" id="6_2dtr0"]
+[ext_resource type="PackedScene" uid="uid://solid4wrap" path="res://structures/solid4.tscn" id="7_eonm2"]
+[ext_resource type="PackedScene" uid="uid://solid8wrap" path="res://structures/solid8.tscn" id="8_2dtr0"]
+[ext_resource type="PackedScene" uid="uid://curva60wrap" path="res://structures/curva60.tscn" id="9_eonm2"]
+[ext_resource type="PackedScene" uid="uid://curva120wrap" path="res://structures/curva120.tscn" id="10_ddh68"]
+[ext_resource type="PackedScene" uid="uid://rampa1wrap" path="res://structures/rampa1.tscn" id="11_o0lnr"]
+[ext_resource type="PackedScene" uid="uid://rampa2wrap" path="res://structures/rampa2.tscn" id="12_o0lnr"]
+[ext_resource type="PackedScene" uid="uid://retowrap" path="res://structures/reto.tscn" id="13_ek25q"]
+
+[sub_resource type="Resource" id="Resource_53l00"]
+script = ExtResource("1_4vos3")
+type = &"marble_spawn"
+scene = ExtResource("2_c4nah")
+height_span = 2
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_4vos3"]
+script = ExtResource("1_4vos3")
+type = &"collector"
+scene = ExtResource("2_v4ofo")
+height_span = 3
+is_solid = true
+is_solid_face = true
+ground_only = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_f0nf4"]
+script = ExtResource("1_4vos3")
+type = &"speed_gate"
+scene = ExtResource("4_kxocf")
+height_span = 4
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_r18du"]
+script = ExtResource("1_4vos3")
+type = &"solid1"
+scene = ExtResource("5_f0nf4")
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_ddh68"]
+script = ExtResource("1_4vos3")
+type = &"solid2"
+scene = ExtResource("6_2dtr0")
+height_span = 2
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_o0lnr"]
+script = ExtResource("1_4vos3")
+type = &"solid4"
+scene = ExtResource("7_eonm2")
+height_span = 4
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_ek25q"]
+script = ExtResource("1_4vos3")
+type = &"solid8"
+scene = ExtResource("8_2dtr0")
+height_span = 8
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_fmhca"]
+script = ExtResource("1_4vos3")
+type = &"curva60"
+scene = ExtResource("9_eonm2")
+height_span = 2
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_1m50m"]
+script = ExtResource("1_4vos3")
+type = &"curva120"
+scene = ExtResource("10_ddh68")
+height_span = 2
+is_solid = true
+is_solid_face = true
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_byh1n"]
+script = ExtResource("1_4vos3")
+type = &"rampa1"
+scene = ExtResource("11_o0lnr")
+height_span = 2
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_8qbpy"]
+script = ExtResource("1_4vos3")
+type = &"rampa2"
+scene = ExtResource("12_o0lnr")
+height_span = 3
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[sub_resource type="Resource" id="Resource_3rugc"]
+script = ExtResource("1_4vos3")
+type = &"reto"
+scene = ExtResource("13_ek25q")
+height_span = 2
+metadata/_custom_type_script = "uid://c04en71ugoacy"
+
+[resource]
+script = ExtResource("2_3u711")
+definitions = Array[ExtResource("1_4vos3")]([SubResource("Resource_53l00"), SubResource("Resource_4vos3"), SubResource("Resource_f0nf4"), SubResource("Resource_r18du"), SubResource("Resource_ddh68"), SubResource("Resource_o0lnr"), SubResource("Resource_ek25q"), SubResource("Resource_fmhca"), SubResource("Resource_1m50m"), SubResource("Resource_byh1n"), SubResource("Resource_8qbpy"), SubResource("Resource_3rugc")])
+metadata/_custom_type_script = "uid://cglkmgif6j4u1"

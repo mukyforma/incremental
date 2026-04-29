@@ -1,10 +1,29 @@
 [gd_scene format=3 uid="uid://curva120wrap"]
 
 [ext_resource type="Script" uid="uid://ci7hdst4sfqal" path="res://StructureBase.gd" id="1_base"]
-[ext_resource type="PackedScene" uid="uid://bu5pokdw27pue" path="res://assets/curva120.glb" id="2_glb"]
+[ext_resource type="PackedScene" uid="uid://bu5pokdw27pue" path="res://assets/meshes/curva120.glb" id="2_glb"]
+[ext_resource type="Script" uid="uid://brl5sqlrori3i" path="res://addons/godot-rapier3d/custom_nodes/rapier_area_3d.gd" id="4_7rdko"]
+[ext_resource type="PackedScene" path="res://components/curve_force.tscn" id="5_cf"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_d56ra"]
+height = 0.33843994
+radius = 0.8120117
 
 [node name="curva120" type="Node3D" unique_id=1222068198]
 script = ExtResource("1_base")
 is_rail = true
 
-[node name="Model" parent="." unique_id=1926178976 instance=ExtResource("2_glb")]
+[node name="Model" parent="." unique_id=1119608118 instance=ExtResource("2_glb")]
+
+[node name="CurveForce" parent="." unique_id=1883168944 instance=ExtResource("5_cf")]
+force_strength = 1.0
+
+[node name="RapierArea3D" type="Area3D" parent="CurveForce" unique_id=99197635]
+collision_layer = 2
+collision_mask = 2
+script = ExtResource("4_7rdko")
+metadata/_custom_type_script = "uid://brl5sqlrori3i"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="CurveForce/RapierArea3D" unique_id=1489299783]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.22348022, 0)
+shape = SubResource("CylinderShape3D_d56ra")

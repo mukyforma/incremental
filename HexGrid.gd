@@ -13,7 +13,8 @@ const HEX_HEIGHT  : float = 0.02    # cosmetic thickness of the floor indicator 
 const SQRT3 : float = 1.7320508075688772
 
 # ── Cell storage ───────────────────────────────────────────────────────────────
-var _cells: Dictionary = {}  # Vector2i -> HexCell
+var _cells: Dictionary = {}                  # Vector2i → HexCell
+var _comutador_base_hexes: Dictionary = {}   # Vector2i → true
 
 # ── Coordinate utilities ───────────────────────────────────────────────────────
 
@@ -141,18 +142,15 @@ func get_structure(hex: Vector2i, height: int) -> StructureBase:
 			return s as StructureBase
 	return null
 
-## Returns true if `hex` is the current base socket of any neighbouring Comutador.
-## This prevents stacking structures on the socket beyond height 1.
+func register_comutador_base(hex: Vector2i) -> void:
+	_comutador_base_hexes[hex] = true
+
+func unregister_comutador_base(hex: Vector2i) -> void:
+	_comutador_base_hexes.erase(hex)
+
+## Returns true if `hex` is the current base socket of any Comutador.
 func is_comutador_base(hex: Vector2i) -> bool:
-	for nb in get_neighbors(hex):
-		var cell := get_cell(nb)
-		if cell == null:
-			continue
-		for h_key in cell.stack:
-			var s = cell.stack[h_key]
-			if s is Comutador and (s as Comutador)._base_hex == hex:
-				return true
-	return false
+	return _comutador_base_hexes.has(hex)
 
 # ── Stack mutation API ─────────────────────────────────────────────────────────
 
@@ -163,6 +161,10 @@ func place_structure(hexes: Array[Vector2i], height: int, structure: Node3D) -> 
 		get_or_create_cell(hex).place(height, structure)
 	if structure.has_method(&"on_placed"):
 		structure.on_placed()
+	if structure is StructureBase:
+		EntryPointRegistry.register_structure(structure as StructureBase)
+		var _connections := ConnectionScanner.scan_from(structure as StructureBase)
+		ConnectionPreview.show_connections(_connections)
 
 ## Low-level: looks up the structure at (hex, height) and unregisters it from
 ## all hexes it occupies (multi-hex aware). Does not free the node.
@@ -191,7 +193,8 @@ func remove_structure(hex: Vector2i, height: int) -> void:
 ## that has since taken over a slot (important during Comutador's swap dance).
 func move_structure(structure: StructureBase, new_pivot: Vector2i) -> void:
 	var s_type : StringName = structure.get("structure_type") if "structure_type" in structure else &""
-	var span   : int        = HEIGHT_SPANS.get(s_type, 1)
+	var _mdef  : StructureDefinition = StructureCatalog.get_by_type(s_type)
+	var span   : int = _mdef.height_span if _mdef != null else HEIGHT_SPANS.get(s_type, 1)
 	var base_h : int        = structure.height_level
 
 	# Unregister: only remove cells that still point to this exact structure
@@ -235,7 +238,9 @@ func spawn_structure(hex: Vector2i, height: int, type: StringName, parent: Node,
 
 	# Assign collision layer 2 ("SolidHexFace") to every StaticBody3D inside
 	# solid structures so the face-raycast hits them exclusively.
-	if type in SOLID_FACE_TYPES:
+	var _sfdef  : StructureDefinition = StructureCatalog.get_by_type(type)
+	var _is_solid_face: bool = _sfdef.is_solid_face if _sfdef != null else type in SOLID_FACE_TYPES
+	if _is_solid_face:
 		for body in structure.find_children("*", "StaticBody3D", true, false):
 			(body as StaticBody3D).collision_layer |= 2
 
@@ -253,12 +258,29 @@ func spawn_structure(hex: Vector2i, height: int, type: StringName, parent: Node,
 	place_structure(occupied, height, structure)   # registers all hexes + calls on_placed()
 
 	# Register every additional level this structure spans
-	var span: int = HEIGHT_SPANS.get(type, 1)
+	var _spdef: StructureDefinition = StructureCatalog.get_by_type(type)
+	var span: int = _spdef.height_span if _spdef != null else HEIGHT_SPANS.get(type, 1)
 	for i in range(1, span):
 		for occ_hex in occupied:
 			get_or_create_cell(occ_hex).place(height + i, structure)
 
 	return structure
+
+func get_all_placed_structures() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for hex in _cells:
+		var cell: HexCell = _cells[hex]
+		for h in cell.stack:
+			result.append({ "hex": hex, "height": h, "node": cell.stack[h] })
+	return result
+
+func despawn_all() -> void:
+	var to_despawn: Array = []
+	for hex in _cells.keys():
+		for h in _cells[hex].stack.keys():
+			to_despawn.append([hex, h])
+	for entry in to_despawn:
+		despawn_structure(entry[0], entry[1])
 
 ## Call on_removed(), unregister all spanned levels across all occupied hexes, and free the node.
 func despawn_structure(hex: Vector2i, height: int) -> void:
@@ -268,13 +290,16 @@ func despawn_structure(hex: Vector2i, height: int) -> void:
 	var structure: Node3D = cell.stack.get(height, null)
 	if structure == null:
 		return
+	if structure is StructureBase:
+		EntryPointRegistry.unregister_structure(structure as StructureBase)
 	if structure.has_method(&"on_removed"):
 		structure.on_removed()
 
 	# Determine base height, span, and all occupied hexes
 	var base_h    : int       = structure.get("height_level")    if "height_level"    in structure else height
 	var s_type    : StringName = structure.get("structure_type") if "structure_type"  in structure else &""
-	var span      : int       = HEIGHT_SPANS.get(s_type, 1)
+	var _ddef     : StructureDefinition = StructureCatalog.get_by_type(s_type)
+	var span      : int = _ddef.height_span if _ddef != null else HEIGHT_SPANS.get(s_type, 1)
 	var pivot_hex : Vector2i  = structure.get("hex_position")    if "hex_position"    in structure else hex
 	var rot_steps : int       = structure.get("rotation_steps")  if "rotation_steps"  in structure else 0
 
@@ -308,7 +333,10 @@ func get_top_structure_type(hex: Vector2i) -> StringName:
 		return &""
 	return s.structure_type as StringName
 
-const SOLID_TYPES: Array = [&"solid1", &"solid2", &"solid4"]
+const SOLID_TYPES: Array = [&"solid1", &"solid2", &"solid4", &"solid8"]
+
+## Structure types that may only be placed at height 0.
+const GROUND_ONLY_TYPES: Array = [&"collector"]
 
 ## All solid types whose StaticBody3D children receive collision layer 2
 ## so the face-raycast can hit them exclusively.
@@ -349,8 +377,11 @@ func can_place_solid_hex(hex: Vector2i, height: int) -> bool:
 	var cell: HexCell = get_cell(hex)
 	if cell != null and cell.stack.has(height - 1):
 		var below: Node3D = cell.stack[height - 1]
-		if "structure_type" in below and below.structure_type in SOLID_TYPES:
-			return true
+		if "structure_type" in below:
+			var _sdef: StructureDefinition = StructureCatalog.get_by_type(below.structure_type)
+			var _is_solid: bool = _sdef.is_solid if _sdef != null else below.structure_type in SOLID_TYPES
+			if _is_solid:
+				return true
 
 	# c) Lateral support from neighbours
 	var support: int = 0

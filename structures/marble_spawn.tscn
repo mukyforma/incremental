@@ -1,42 +1,30 @@
 [gd_scene format=3 uid="uid://mbsp"]
 
 [ext_resource type="Script" uid="uid://ctcyjao7m8fxv" path="res://structures/MarbleSpawn.gd" id="1_spawn"]
-
-[sub_resource type="StandardMaterial3D" id="Mat_white"]
-albedo_color = Color(0.9, 0.9, 0.9, 1)
-metallic = 0.2
-roughness = 0.7
-
-[sub_resource type="CylinderMesh" id="CylinderMesh_ped"]
-top_radius = 0.08
-bottom_radius = 0.08
-height = 0.15
-radial_segments = 16
-
-[sub_resource type="CylinderShape3D" id="CylShape_ped"]
-height = 0.15
-radius = 0.08
-
-[sub_resource type="BoxShape3D" id="BoxShape3D_xgmb8"]
-size = Vector3(0.173, 0.19202758, 0.16789551)
+[ext_resource type="PackedScene" uid="uid://c5mjmwecb8nmn" path="res://assets/meshes/MarbleSpawn.glb" id="2_wm0v7"]
+[ext_resource type="PackedScene" uid="uid://lcan" path="res://structures/launch_cannon_component.tscn" id="3_qy6ok"]
+[ext_resource type="PackedScene" uid="uid://c326uetoej478" path="res://components/sound_component.tscn" id="4_jikrx"]
+[ext_resource type="AudioStream" uid="uid://d308e6ubwdco4" path="res://assets/sounds/MarbleSpawn.wav" id="5_wlsuw"]
 
 [node name="MarbleSpawn" type="Node3D" unique_id=2012197073]
 script = ExtResource("1_spawn")
+activatable = true
 
-[node name="Pedestal" type="StaticBody3D" parent="." unique_id=329586363]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.069165796, 0)
+[node name="MarbleSpawnMesh" parent="." unique_id=1241792826 instance=ExtResource("2_wm0v7")]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Pedestal" unique_id=678240613]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
-material_override = SubResource("Mat_white")
-mesh = SubResource("CylinderMesh_ped")
+[node name="SpawnOrigin" type="Marker3D" parent="." unique_id=171010890]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.28628305, -0.5000614)
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pedestal" unique_id=1745402997]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.075, 0)
-shape = SubResource("CylShape_ped")
+[node name="LaunchCannonComponent" parent="." unique_id=1833688758 instance=ExtResource("3_qy6ok")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.19722155, 0.16640615)
+launch_speed = 2.0
 
-[node name="MarbleDetector" type="Area3D" parent="." unique_id=1220873154]
+[node name="SoundComponent" parent="." unique_id=200670745 instance=ExtResource("4_jikrx")]
+sound = ExtResource("5_wlsuw")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="MarbleDetector" unique_id=1363754398]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.24432921, 0.00330811)
-shape = SubResource("BoxShape3D_xgmb8")
+[node name="Entry_E4_H0" type="Marker3D" parent="." unique_id=2076581869]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.3776821e-16, 0, -0.75)
+gizmo_extents = 0.15
+
+[connection signal="activated" from="." to="LaunchCannonComponent" method="_on_marble_spawn_activated"]
+[connection signal="activated" from="." to="SoundComponent" method="_on_activated"]

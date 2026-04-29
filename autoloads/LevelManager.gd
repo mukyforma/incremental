@@ -1,45 +1,82 @@
 extends Node
 
-## Ordered list of objective definitions.
-## structure_node is assigned at runtime when a matching structure is placed.
-var _objectives: Array = [
-	{
-		"type":           "speed_gate",
-		"structure_node": null,
-		"min_speed":      2.0,
-	}
-]
+signal objective_completed(index: int)
+signal level_completed()
+signal level_loaded(data: LevelData)
 
-var _current_index: int = 0
+var _level_data: LevelData = null
+var _completed:  Array[bool] = []
 
-# ── Registration ───────────────────────────────────────────────────────────────
+# ── Lifecycle ──────────────────────────────────────────────────────────────────
 
-## Called by SpeedGate.on_placed(). Connects the gate to the first unassigned
-## speed_gate objective so its triggered signal drives the condition check.
-func register_speed_gate(gate: Node) -> void:
-	for obj in _objectives:
-		if obj["type"] == "speed_gate" and obj["structure_node"] == null:
-			obj["structure_node"] = gate
-			gate.triggered.connect(_on_speed_gate_triggered.bind(obj))
+func _ready() -> void:
+	StructureEvents.structure_placed.connect(_on_structure_placed)
+
+# ── Level loading ──────────────────────────────────────────────────────────────
+
+func load_level(data: LevelData) -> void:
+	_level_data = data
+	_completed  = []
+	_completed.resize(data.objectives.size())
+	_completed.fill(false)
+	level_loaded.emit(data)
+
+# ── Structure registration (internal) ─────────────────────────────────────────
+
+func _on_structure_placed(structure: Node) -> void:
+	if structure is SpeedGate:
+		_register_speed_gate(structure as SpeedGate)
+
+func _register_speed_gate(gate: SpeedGate) -> void:
+	if _level_data == null:
+		return
+	for i in range(_level_data.objectives.size()):
+		var obj: ObjectiveData = _level_data.objectives[i]
+		if obj.type == &"speed_gate" and not _completed[i]:
+			gate.triggered.connect(_on_speed_gate_triggered.bind(i))
 			return
+
+# ── Objective notification ─────────────────────────────────────────────────────
+
+## Generic entry point for objective progress; used by structures that don't
+## have a direct signal connection (e.g. future types).
+func notify_objective(type: StringName, payload: Dictionary) -> void:
+	if _level_data == null:
+		return
+	for i in range(_level_data.objectives.size()):
+		if _completed[i]:
+			continue
+		var obj: ObjectiveData = _level_data.objectives[i]
+		if obj.type != type:
+			continue
+		if type == &"speed_gate":
+			var speed: float = payload.get("speed", 0.0)
+			if speed >= obj.min_speed:
+				_complete_objective(i)
+			else:
+				print("Too slow: %.2f / %.2f" % [speed, obj.min_speed])
+		return
 
 # ── Signal handlers ────────────────────────────────────────────────────────────
 
-func _on_speed_gate_triggered(trigger_speed: float, obj: Dictionary) -> void:
-	if _current_index >= _objectives.size():
+func _on_speed_gate_triggered(trigger_speed: float, index: int) -> void:
+	if _level_data == null or index >= _level_data.objectives.size():
 		return
-	var current_obj: Dictionary = _objectives[_current_index]
-	if current_obj != obj:
+	if _completed[index]:
 		return
-	var min_speed: float = current_obj["min_speed"]
-	if trigger_speed >= min_speed:
-		_on_objective_complete()
+	var obj: ObjectiveData = _level_data.objectives[index]
+	if trigger_speed >= obj.min_speed:
+		_complete_objective(index)
 	else:
-		print("Too slow: %.2f / %.2f" % [trigger_speed, min_speed])
+		print("Too slow: %.2f / %.2f" % [trigger_speed, obj.min_speed])
 
-# ── Objective progression ──────────────────────────────────────────────────────
+# ── Completion ─────────────────────────────────────────────────────────────────
 
-func _on_objective_complete() -> void:
+func _complete_objective(index: int) -> void:
+	_completed[index] = true
 	print("OBJECTIVE COMPLETE")
-	_current_index += 1
-	# TODO: reveal next objective
+	objective_completed.emit(index)
+#	AudioManager.play_sfx(load("res://assets/sounds/objective_completed.wav"))
+
+	if _completed.all(func(c: bool) -> bool: return c):
+		level_completed.emit()

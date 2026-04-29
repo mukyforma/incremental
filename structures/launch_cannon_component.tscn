@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://lcan"]
+
+[ext_resource type="Script" uid="uid://dkg0v0pihiidf" path="res://components/Launcher.gd" id="1_launcher"]
+
+[sub_resource type="StandardMaterial3D" id="Mat_dark_orange"]
+albedo_color = Color(0.75, 0.3, 0, 1)
+metallic = 0.45
+roughness = 0.55
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_barrel"]
+top_radius = 0.08
+bottom_radius = 0.08
+height = 0.4
+radial_segments = 16
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_e8khc"]
+radius = 0.10888672
+height = 0.55908203
+
+[node name="LaunchCannonComponent" type="Node3D" unique_id=1833688758]
+script = ExtResource("1_launcher")
+
+[node name="BarrelPivot" type="AnimatableBody3D" parent="." unique_id=1253776640]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, 1, 0, -1, -4.371139e-08, 0, 0.1, 0)
+sync_to_physics = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="BarrelPivot" unique_id=2031461696]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, 0)
+material_override = SubResource("Mat_dark_orange")
+mesh = SubResource("CylinderMesh_barrel")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="BarrelPivot" unique_id=1561097489]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.20805663, 0)
+shape = SubResource("CapsuleShape3D_e8khc")

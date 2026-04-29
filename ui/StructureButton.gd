@@ -119,18 +119,25 @@ func _build_preview() -> void:
 	_viewport.add_child(cam)
 
 	# Structure-specific preview
-	match structure_type:
-		&"marble_spawn":  _preview_marble_spawn()
-		&"launch_cannon": _preview_launch_cannon()
-		&"solid1":        _preview_glb("res://assets/solid1.glb")
-		&"solid2":        _preview_glb("res://assets/solid2.glb")
-		&"solid4":        _preview_glb("res://assets/solid4.glb")
-		&"reto":          _preview_glb("res://assets/reto.glb")
-		&"curva60":       _preview_glb("res://assets/curva60.glb")
-		&"curva120":      _preview_glb("res://assets/curva120.glb")
-		&"rampa1":        _preview_glb("res://assets/rampa1.glb")
-		&"rampa2":        _preview_glb("res://assets/rampa2.glb")
-		&"solid8":        _preview_glb("res://assets/solid8.glb")
+	var _def: StructureDefinition = StructureCatalog.get_by_type(structure_type)
+	if _def != null:
+		if _def.preview_mesh_path != "":
+			_preview_glb(_def.preview_mesh_path)
+		# else: skip mesh — same as current silent behavior
+	else:
+		match structure_type:
+			&"marble_spawn":  _preview_marble_spawn()
+			&"launch_cannon": _preview_launch_cannon()
+			&"solid1":        _preview_glb("res://assets/solid1.glb")
+			&"solid2":        _preview_glb("res://assets/solid2.glb")
+			&"solid4":        _preview_glb("res://assets/solid4.glb")
+			&"reto":          _preview_glb("res://assets/reto.glb")
+			&"curva60":       _preview_glb("res://assets/curva60.glb")
+			&"curva120":      _preview_glb("res://assets/curva120.glb")
+			&"rampa1":        _preview_glb("res://assets/rampa1.glb")
+			&"rampa2":        _preview_glb("res://assets/rampa2.glb")
+			&"solid8":        _preview_glb("res://assets/solid8.glb")
+			&"collector":     _preview_glb("res://assets/meshes/collector.glb")
 
 func _add_preview_mesh(mesh: Mesh, color: Color, pos: Vector3 = Vector3.ZERO, rot_y: float = 0.0) -> void:
 	var mat := StandardMaterial3D.new()
